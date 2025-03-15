@@ -142,7 +142,34 @@ const blogUpdate = async (req, res) => {
     return res.status(500).send({ message: "Internal server error" });
   }
 };
+const getBlogsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    const blogs = await Blog.find({ category: category }).populate("category","name");
+    if (!blogs) {
+      return res.status(400).send({ message: "Blogs not found" });
+    }
 
+    return res.status(200).send({ message: "Blogs found", blogs });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: "Internal server error" });
+  }
+};
+const getBlogById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      return res.status(400).send({ message: "Blog not found" });
+    }
+
+    return res.status(200).send({ message: "Blog found", blog });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({ message: "Internal server error" });
+  }
+};
 module.exports = {
   createBlog,
   params,

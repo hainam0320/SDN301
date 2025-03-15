@@ -16,6 +16,7 @@ const blogSchema = new mongoose.Schema(
       required: true,
       ref: "User",
     },
+    like: { type: Number, default: 0 },
   },
   {
     timestamps: true,

@@ -12,11 +12,11 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get("http://localhost:9999/api/v1/category/getcategory")
+    axios.get("http://localhost:9999/category/getcategory")
       .then(response => setCategories(response.data))
       .catch(error => console.error("Error fetching categories:", error));
     
-    axios.get("http://localhost:9999/api/v1/blogs")
+    axios.get("http://localhost:9999/blogs")
       .then(response => {
         setBlogs(response.data);
         setLoading(false);
@@ -31,7 +31,6 @@ const HomePage = () => {
 
   return (
     <>
-      <Header />
       <Container>
         <h2 className="mt-4">Danh mục</h2>
         <Row>
