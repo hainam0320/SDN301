@@ -10,5 +10,4 @@ const dbConnection = async () => {
     console.log("Server connection is failed");
   }
 };
-
 module.exports = dbConnection;
