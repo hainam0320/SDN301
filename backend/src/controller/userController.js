@@ -83,14 +83,10 @@ const forgetPassword = async (req, res) => {
     const checkUser = await User.findOne({ email });
 
     if (!checkUser) {
-      return res
-        .status(400)
-        .send({ message: "User not found please register" });
+      return res.status(400).send({ message: "User not found, please register" });
     }
 
-    const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY, { expiresIn: "1h" });
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -101,22 +97,23 @@ const forgetPassword = async (req, res) => {
       },
     });
 
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`; // Sửa lại link
+
     const receiver = {
-      from: "webdesignwalah@gmail.com",
+      from: process.env.MY_GMAIL,
       to: email,
       subject: "Password Reset Request",
-      text: `Click on this link to generate your new password ${process.env.CLIENT_URL}/reset-password/${token}`,
+      text: `Click on this link to reset your password: ${resetLink}`,
     };
 
     await transporter.sendMail(receiver);
 
-    return res.status(200).send({
-      message: "Password reset link send successfully on your gmail account",
-    });
+    return res.status(200).send({ message: "Password reset link sent successfully to your email" });
   } catch (error) {
     return res.status(500).send({ message: "Something went wrong" });
   }
 };
+
 
 const resetPassword = async (req, res) => {
   try {
@@ -180,7 +177,6 @@ const changePassword = async (req, res) => {
     return res.status(500).send({ message: "Something went wrong" });
   }
 };
-
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find();
