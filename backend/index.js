@@ -8,11 +8,7 @@ const fileRouter = require("./src/file/filerouter");
 const blogRouter = require("./src/router/blogRouter");
 const cors = require("cors");
 
-app.use(cors({
-  origin: 'http://localhost:3000', // URL của frontend React
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send(`<h1>Welcome to nodejs series</h1>`);

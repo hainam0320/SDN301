@@ -12,7 +12,7 @@ const App = () => {
             <div className="flex flex-col items-center justify-center min-h-screen">
              
                 <Routes>
-                    <Route path="/" element={<Login />} />
+                    <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />  
                     <Route path="/change-password" element={<ChangePassword />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
