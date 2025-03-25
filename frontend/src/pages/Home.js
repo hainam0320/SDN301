@@ -5,54 +5,51 @@ import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const HomePage = () => {
-  const [categories, setCategories] = useState([]);
-  const [blogs, setBlogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState(null); // Trạng thái danh mục được chọn
+  const [categories, setCategories] = useState([]); // Danh sách danh mục
+  const [blogs, setBlogs] = useState([]); // Danh sách blog
+  const [loading, setLoading] = useState(true); // Trạng thái loading
+  const [selectedCategory, setSelectedCategory] = useState(null); // Danh mục đang chọn
 
+  // Lấy danh sách danh mục từ API
   useEffect(() => {
-    axios.get("http://localhost:9999/category/getcategory")
+    axios.get("http://localhost:9999/getcategory")
       .then(response => setCategories(response.data))
       .catch(error => console.error("Error fetching categories:", error));
-
-    fetchBlogs();
   }, []);
 
-  const fetchBlogs = (category = null) => {
-    setLoading(true);
-    let url = "http://localhost:9999/getblog";
-    if (category) url = `http://localhost:9999/getblogbycategory/${category}`;
-
-    axios.get(url)
-      .then(response => {
+  // Lấy danh sách blog theo danh mục
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      setLoading(true);
+      try {
+        const url = selectedCategory 
+          ? `http://localhost:9999/getblogbycategory/${selectedCategory}`
+          : "http://localhost:9999/getblog";
+        
+        const response = await axios.get(url);
         setBlogs(Array.isArray(response.data.blogs) ? response.data.blogs : []);
-        setLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("Error fetching blogs:", error);
+      } finally {
         setLoading(false);
-      });
-  };
+      }
+    };
 
-  const handleCategoryClick = (categoryId) => {
-    setSelectedCategory(categoryId);
-    fetchBlogs(categoryId);
-  };
+    fetchBlogs();
+  }, [selectedCategory]); // Chạy lại khi selectedCategory thay đổi
 
   if (loading) return <Spinner animation="border" className="d-block mx-auto mt-5" />;
 
   return (
     <Container>
+      {/* Danh mục */}
       <h2 className="mt-4">Danh mục</h2>
       <Row>
         <Col md={3} className="mb-3">
           <Button
             variant={selectedCategory ? "outline-primary" : "primary"}
             className="w-100"
-            onClick={() => {
-              setSelectedCategory(null);
-              fetchBlogs();
-            }}
+            onClick={() => setSelectedCategory(null)}
           >
             Tất cả
           </Button>
@@ -62,7 +59,7 @@ const HomePage = () => {
             <Button
               variant={selectedCategory === category._id ? "primary" : "outline-primary"}
               className="w-100"
-              onClick={() => handleCategoryClick(category._id)}
+              onClick={() => setSelectedCategory(category._id)}
             >
               {category.name}
             </Button>
@@ -70,6 +67,7 @@ const HomePage = () => {
         ))}
       </Row>
 
+      {/* Danh sách blog */}
       <h2 className="mt-4">Tất cả Blog</h2>
       <Row>
         {blogs.length > 0 ? (
@@ -86,7 +84,7 @@ const HomePage = () => {
             </Col>
           ))
         ) : (
-          <p>Không có blog nào</p>
+          <p className="text-center">Không có blog nào</p>
         )}
       </Row>
     </Container>

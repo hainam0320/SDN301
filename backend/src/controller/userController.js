@@ -52,25 +52,28 @@ const userLogin = async (req, res) => {
 
     const isUser = await User.findOne({ email });
 
-    const token = await generateToken(isUser._id);
-
     if (!isUser) {
       return res
         .status(400)
-        .send({ message: "User not found please register" });
+        .send({ message: "User not found, please register" });
     }
 
     const isMatchPassword = await comparePassword(password, isUser.password);
 
     if (!isMatchPassword) {
-      return res.status(400).send({ message: "Please provide valid password" });
+      return res.status(400).send({ message: "Invalid password" });
     }
+
+    // ✅ Tạo token sau khi kiểm tra user tồn tại và password đúng
+    const token = await generateToken(isUser._id);
 
     return res.status(200).send({ message: "User login successfully", token });
   } catch (error) {
+    console.error("Login error:", error); // Log lỗi để debug
     return res.status(500).send({ message: "Something went wrong" });
   }
 };
+
 
 const forgetPassword = async (req, res) => {
   try {

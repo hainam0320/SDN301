@@ -17,7 +17,7 @@ const ForgotPassword = () => {
         setIsError(false);
 
         try {
-            const res = await axios.post("http://localhost:5000/api/v1/user/forget-password", { email });
+            const res = await axios.post("http://localhost:9999/api/v1/user/forget-password", { email });
             setMessage(res.data.message);
             setEmail(""); // Xóa input sau khi gửi thành công
         } catch (error) {

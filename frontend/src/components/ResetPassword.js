@@ -13,7 +13,7 @@ const ResetPassword = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:5000/api/v1/user/reset-password/${token}`, { password: newPassword });
+      const res = await axios.post(`http://localhost:9999/api/v1/user/reset-password/${token}`, { password: newPassword });
       setMessage(res.data.message);
     } catch (error) {
       setMessage(error.response?.data?.message || "Lỗi xảy ra");

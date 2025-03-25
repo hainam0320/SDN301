@@ -32,6 +32,9 @@ app.use("/", fileRouter);
 // create blog router
 app.use("/", blogRouter);
 
+// create category router
+app.use("/", categoryRouter);
+
 app.listen(PORT, () => {
   console.log(`Server is started on port : ${PORT}`);
 });

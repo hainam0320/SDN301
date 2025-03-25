@@ -4,6 +4,6 @@ const { authMiddleware } = require("../middleware/middleware");
 
 const categoryRouter = express.Router();
 
-categoryRouter.get("/getcategory", authMiddleware, getCategory);
+categoryRouter.get("/getcategory", getCategory);
 
 module.exports = categoryRouter;

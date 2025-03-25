@@ -5,18 +5,12 @@ const blogSchema = new mongoose.Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     category: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "Category" },
-    image: {
-      name: { type: String, required: true },
-      ext: { type: String, required: true },
-      mimeType: { type: String, required: true },
-      path: { type: String, required: true },
-    },
+    image: { type: String, required: true },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
     },
-    like: { type: Number, default: 0 },
   },
   {
     timestamps: true,

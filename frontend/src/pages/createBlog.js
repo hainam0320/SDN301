@@ -1,67 +1,109 @@
-import { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Form, Button, Container, Alert } from "react-bootstrap";
 
-export default function CreateBlog() {
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "",
-    image: null,
-  });
+const CreateBlog = () => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("");
+  const [imageUrl, setImageUrl] = useState(""); // Dùng URL thay vì file
+  const [categories, setCategories] = useState([]);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleFileChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
-  };
+  // Lấy danh sách danh mục
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await axios.get("http://localhost:9999/getcategory");
+        setCategories(res.data); // Đảm bảo luôn là mảng
+      } catch (error) {
+        console.error("Lỗi khi tải danh mục", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formDataObj = new FormData();
-    formDataObj.append("title", formData.title);
-    formDataObj.append("description", formData.description);
-    formDataObj.append("category", formData.category);
-    formDataObj.append("image", formData.image);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMessage("Bạn cần đăng nhập để tạo blog!");
+      return;
+    }
+
+    if (!title || !description || !category || !imageUrl) {
+      setMessage("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+
+    const blogData = { title, description, category, image: imageUrl };
 
     try {
-      const response = await axios.post("http://localhost:9999/blog/create", formDataObj, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
+      const res = await axios.post("http://localhost:9999/api/v1/user/create/blog", blogData, {
+        headers: { Authorization: token },
       });
-      alert("Bài viết đã được tạo thành công!");
-      navigate(`/blog/${response.data.blogData._id}`);
+
+      setMessage("Tạo blog thành công!");
+      setTimeout(() => navigate("/"), 2000);
     } catch (error) {
-      alert("Lỗi khi tạo bài viết: " + error.response?.data?.message);
+      setMessage(error.response?.data?.message || "Lỗi khi tạo blog!");
     }
   };
 
   return (
-    <div className="container mt-4">
-      <h2>Tạo bài viết mới</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Tiêu đề</label>
-          <input type="text" className="form-control" name="title" value={formData.title} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Mô tả</label>
-          <textarea className="form-control" name="description" value={formData.description} onChange={handleChange} required></textarea>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Danh mục</label>
-          <input type="text" className="form-control" name="category" value={formData.category} onChange={handleChange} required />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Hình ảnh</label>
-          <input type="file" className="form-control" onChange={handleFileChange} required />
-        </div>
-        <button type="submit" className="btn btn-primary">Tạo bài viết</button>
-      </form>
-    </div>
+    <Container className="mt-4">
+      <h2 className="text-center mb-4">Viết Blog</h2>
+      {message && <Alert variant="info">{message}</Alert>}
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3">
+          <Form.Label>Tiêu đề</Form.Label>
+          <Form.Control 
+            type="text" 
+            value={title} 
+            onChange={(e) => setTitle(e.target.value)} 
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Mô tả</Form.Label>
+          <Form.Control 
+            as="textarea" 
+            rows={4} 
+            value={description} 
+            onChange={(e) => setDescription(e.target.value)} 
+            required 
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Danh mục</Form.Label>
+          <Form.Select value={category} onChange={(e) => setCategory(e.target.value)} required>
+            <option value="">Chọn danh mục</option>
+            {categories.map((cat) => (
+              <option key={cat._id} value={cat._id}>{cat.name}</option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>URL Ảnh</Form.Label>
+          <Form.Control 
+            type="text" 
+            placeholder="Nhập URL ảnh" 
+            value={imageUrl} 
+            onChange={(e) => setImageUrl(e.target.value)} 
+            required 
+          />
+        </Form.Group>
+
+        <Button variant="primary" type="submit" className="w-100">Tạo Blog</Button>
+      </Form>
+    </Container>
   );
-}
+};
+
+export default CreateBlog;

@@ -2,61 +2,30 @@ const randomString = require("randomstring");
 const Blog = require("../model/blogModel");
 const fs = require("fs");
 
-function fileUpload(fileData) {
-  const name = randomString.generate({
-    length: 12,
-    charset: "alphabetic",
-  });
 
-  let fileExtension = fileData.name.split(".");
-  fileExtension = fileExtension[fileExtension.length - 1];
-
-  let mimeType = fileData.mimetype.split("/")[0];
-  mimeType =
-    mimeType === "image" || mimeType === "video" ? mimeType : "document";
-
-  let fileName = `${name}.${fileExtension}`;
-
-  let filePath = "/public/images/" + fileName;
-
-  fileData.mv("./src" + filePath);
-
-  return {
-    name: fileName,
-    ext: fileExtension,
-    mimeType: mimeType,
-    path: filePath,
-  };
-}
 
 const createBlog = async (req, res) => {
   try {
-    const { userId } = req.user;
-    const { file } = req.files;
+    const { userId } = req.user; // Lấy userId từ token
+    const { title, description, category, image } = req.body;
 
-    const { title, description, category } = req.body;
-
-    if (!title || !description || !category || !file || !userId) {
-      return res
-        .status(400)
-        .send({ message: "Please provide all required fields." });
+    if (!title || !description || !category || !image) {
+      return res.status(400).send({ message: "Vui lòng nhập đủ thông tin!" });
     }
 
-    const fileData = fileUpload(file);
-
+    // Tạo blog mới
     const blogData = await Blog.create({
       title,
       description,
       category,
-      image: fileData,
-      userId: userId,
+      image, // URL ảnh
+      userId,
     });
-    return res
-      .status(201)
-      .send({ message: "Blog created successfully", blogData });
+
+    return res.status(201).send({ message: "Tạo blog thành công!", blog: blogData });
   } catch (error) {
-    console.log(error);
-    return res.status(500).send({ message: "Internal server error" });
+    console.error("Lỗi khi tạo blog:", error);
+    return res.status(500).send({ message: "Lỗi server!" });
   }
 };
 
@@ -144,22 +113,25 @@ const blogUpdate = async (req, res) => {
 };
 const getBlogsByCategory = async (req, res) => {
   try {
-    const { category } = req.params;
-    const blogs = await Blog.find({ category: category }).populate("category","name");
-    if (!blogs) {
-      return res.status(400).send({ message: "Blogs not found" });
+    const { categoryId } = req.params; // Lấy category ID từ URL params
+
+    if (!categoryId) {
+      return res.status(400).send({ message: "Category ID is required" });
     }
 
-    return res.status(200).send({ message: "Blogs found", blogs });
+    const blogs = await Blog.find({ categoryId });
+
+    return res.status(200).send( blogs);
   } catch (error) {
-    console.log(error);
+    console.error("Error fetching blogs by category:", error);
     return res.status(500).send({ message: "Internal server error" });
   }
 };
 const getBlogById = async (req, res) => {
   try {
     const { id } = req.params;
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id).populate("category", "name")
+      .populate("userId", "userName");
     if (!blog) {
       return res.status(400).send({ message: "Blog not found" });
     }

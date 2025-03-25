@@ -20,6 +20,6 @@ blogRouter.get("/getblog", getAllBlogs);
 blogRouter.get("/getuserblog/:userId", authMiddleware, getUserBlogs);
 blogRouter.put("/updateblog/:id", blogUpdate);
 blogRouter.get("/getblog/:id", getBlogById);
-blogRouter.get("/getblogbycategory/:category", getBlogsByCategory);
+blogRouter.get("/getblogbycategory/:categoryId", getBlogsByCategory);
 
 module.exports = blogRouter;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';  // Import useNavigate
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -6,13 +7,23 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const navigate = useNavigate();  // Hook để chuyển hướng
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:5000/api/v1/user/login', { email, password });
-            setMessage(response.data.message);
+            const response = await axios.post('http://localhost:9999/api/v1/user/login', { email, password });
+
+            // Lưu token vào localStorage
             localStorage.setItem('token', response.data.token);
+
+            // Hiển thị thông báo
+            setMessage(response.data.message);
+
+            // Chuyển hướng sang trang Home sau 1 giây
+            setTimeout(() => {
+                navigate('/home'); // Điều hướng đến trang Home
+            }, 1000);
         } catch (error) {
             setMessage(error.response?.data?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
         }
@@ -20,9 +31,9 @@ const Login = () => {
 
     return (
         <div className="d-flex justify-content-center align-items-center vh-100 bg-light"
-        style={{
-          background: 'linear-gradient(135deg, #6a11cb, #2575fc)',
-      }}>
+            style={{
+                background: 'linear-gradient(135deg, #6a11cb, #2575fc)',
+            }}>
             <div className="card p-4 shadow-lg" style={{ width: '400px' }}>
                 <h2 className="text-center mb-4">Login</h2>
                 <form onSubmit={handleLogin}>
