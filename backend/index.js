@@ -6,6 +6,7 @@ const authRouter = require("./src/router/authRouter");
 const expressFileupload = require("express-fileupload");
 const fileRouter = require("./src/file/filerouter");
 const blogRouter = require("./src/router/blogRouter");
+const categoryRouter = require("./src/router/categoryRouter");
 const cors = require("cors");
 
 app.use(cors());

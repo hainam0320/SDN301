@@ -177,4 +177,6 @@ module.exports = {
   getAllBlogs,
   getUserBlogs,
   blogUpdate,
+  getBlogsByCategory,
+  getBlogById
 };

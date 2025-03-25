@@ -6,6 +6,8 @@ const {
   getAllBlogs,
   getUserBlogs,
   blogUpdate,
+  getBlogsByCategory,
+  getBlogById
 } = require("../controller/blogController");
 const { authMiddleware } = require("../middleware/middleware");
 
@@ -17,5 +19,7 @@ blogRouter.delete("/create/blog/:id", authMiddleware, deleteBlog);
 blogRouter.get("/getblog", getAllBlogs);
 blogRouter.get("/getuserblog/:userId", authMiddleware, getUserBlogs);
 blogRouter.put("/updateblog/:id", blogUpdate);
+blogRouter.get("/getblog/:id", getBlogById);
+blogRouter.get("/getblogbycategory/:category", getBlogsByCategory);
 
 module.exports = blogRouter;
