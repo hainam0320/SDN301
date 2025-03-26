@@ -201,6 +201,49 @@ const getAllUsers = async (req, res) => {
     return res.status(500).send({ message: "Something went wrong" });
   }
 };
+const getProfile = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Unauthorized: No token provided" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const userId = decoded.userId;
+
+    const user = await User.findById(userId).select("-password"); // Không trả về password
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.status(200).json({ message: "User profile retrieved", user });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Unauthorized: No token provided" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const userId = decoded.userId;
+
+    const { userName, lastName, phone, email } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (userName) user.userName = userName;
+    if (lastName) user.lastName = lastName;
+    if (phone) user.phone = phone;
+    if (email) user.email = email;
+
+
+    await user.save();
+    return res.status(200).json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 
 module.exports = {
   userRegister,
@@ -209,4 +252,7 @@ module.exports = {
   resetPassword,
   changePassword,
   getAllUsers,
+  getProfile,
+  updateProfile,
 };
+

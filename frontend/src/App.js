@@ -11,6 +11,8 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CreateBlog from "./pages/createBlog";
 import UserBlogs from "./pages/UserBlogs";
+import Profile from './pages/profile';
+import updateblog from './pages/updateBlog';
 import { Container } from "react-bootstrap";
 
 const App = () => {
@@ -29,6 +31,9 @@ const App = () => {
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/createblog" element={<CreateBlog />} />
                     <Route path="/myblogs" element={<UserBlogs />} />
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/updateblog/:id" element={<updateblog />} />
                 </Routes>
             </div>
             <Footer />

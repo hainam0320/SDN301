@@ -38,13 +38,14 @@ const CreateBlog = () => {
       setMessage("Vui lòng nhập đầy đủ thông tin!");
       return;
     }
-
+    console.log("Category ID:", category);
     const blogData = { title, description, category, image: imageUrl };
 
     try {
-      const res = await axios.post("http://localhost:9999/create/blog", blogData, {
-        headers: { Authorization: token },
+      const res = await axios.post("http://localhost:9999/createblog", blogData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      
 
       setMessage("Tạo blog thành công!");
       setTimeout(() => navigate("/home"), 2000);
@@ -103,7 +104,9 @@ const CreateBlog = () => {
         <Button variant="primary" type="submit" className="w-100">Tạo Blog</Button>
       </Form>
     </Container>
+    
   );
 };
+
 
 export default CreateBlog;

@@ -6,6 +6,8 @@ const {
   resetPassword,
   changePassword,
   getAllUsers,
+  getProfile,
+  updateProfile
 } = require("../controller/userController");
 const { authMiddleware, adminMiddleware } = require("../middleware/middleware");
 
@@ -18,5 +20,6 @@ authRouter.post("/reset-password/:token", resetPassword);
 authRouter.post("/change-password", changePassword);
 authRouter.post("/token", authMiddleware);
 authRouter.get("/getusers", authMiddleware, adminMiddleware, getAllUsers);
-
+authRouter.get("/profile", authMiddleware, getProfile);
+authRouter.put("/upprofile", authMiddleware, updateProfile);
 module.exports = authRouter;

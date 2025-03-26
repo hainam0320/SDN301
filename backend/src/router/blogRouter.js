@@ -13,9 +13,9 @@ const { authMiddleware } = require("../middleware/middleware");
 
 const blogRouter = express.Router();
 
-blogRouter.post("/create/blog", createBlog);
+blogRouter.post("/createblog",authMiddleware, createBlog);
 blogRouter.post("/create/blog/:id", params);
-blogRouter.delete("/create/blog/:id", authMiddleware, deleteBlog);
+blogRouter.delete("/deleteblog/:id", authMiddleware, deleteBlog);
 blogRouter.get("/getblog", getAllBlogs);
 blogRouter.get("/getuserblog/:userId",authMiddleware, getUserBlogs);
 

@@ -4,31 +4,41 @@ const fs = require("fs");
 
 
 
+const mongoose = require('mongoose'); // Đảm bảo bạn đã import mongoose
+
 const createBlog = async (req, res) => {
   try {
-    const { userId } = req.user; // Lấy userId từ token
     const { title, description, category, image } = req.body;
+    const userId = req.user._id;
 
     if (!title || !description || !category || !image) {
-      return res.status(400).send({ message: "Vui lòng nhập đủ thông tin!" });
+      return res.status(400).json({ message: "Vui lòng nhập đủ thông tin!" });
     }
 
-    // Tạo blog mới
-    const blogData = await Blog.create({
+    // Kiểm tra xem ID danh mục có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(category)) {
+      return res.status(400).json({ message: "ID danh mục không hợp lệ!" });
+    }
+
+    const newBlog = new Blog({
       title,
       description,
-      category,
-      image, // URL ảnh
-      userId,
+      category: category, // Giả sử chuỗi category là một ObjectId hợp lệ, Mongoose sẽ tự xử lý
+      image,
+      userId: userId,
     });
 
-    return res.status(201).send({ message: "Tạo blog thành công!", blog: blogData });
+    await newBlog.save();
+
+    return res.status(201).json({
+      message: "Tạo blog thành công!",
+      blog: newBlog,
+    });
   } catch (error) {
     console.error("Lỗi khi tạo blog:", error);
-    return res.status(500).send({ message: "Lỗi server!" });
+    return res.status(500).json({ message: "Lỗi server!" });
   }
 };
-
 // this is only for test purpose ------------------->
 const params = (req, res) => {
   const { id } = req.params;
@@ -37,27 +47,27 @@ const params = (req, res) => {
 
 const deleteBlog = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params; // Lấy ID blog từ request params
+    const userId = req.user._id; // Lấy userId từ middleware (đã xác thực)
 
-    const blogData = await Blog.findById(id);
+    // ✅ 1. Kiểm tra blog có tồn tại không
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      return res.status(404).json({ message: "Không tìm thấy blog!" });
+    }
 
-    const filePath = "./src" + blogData.image.path;
-    // const filePath = "./src/public/images/oLGIOaTFwxyr.jpg";
+    // ✅ 2. Kiểm tra quyền xóa (chỉ admin hoặc chủ bài viết)
+    if (blog.userId.toString() !== userId.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ message: "Bạn không có quyền xóa blog này!" });
+    }
 
-    fs.unlink(
-      filePath,
-      (err) => {
-        console.log("Error while deleting the file", err);
-      },
-      console.log("File deleted successfully")
-    );
-
+    // ✅ 3. Xóa blog khỏi database
     await Blog.findByIdAndDelete(id);
 
-    return res.status(200).send({ message: "File deleted successfully" });
+    return res.status(200).json({ message: "Xóa blog thành công!" });
   } catch (error) {
-    console.log(error);
-    return res.status(500).send({ message: "Internal server error" });
+    console.error("❌ Lỗi khi xóa blog:", error);
+    return res.status(500).json({ message: "Lỗi server!" });
   }
 };
 
@@ -96,22 +106,49 @@ const getUserBlogs = async (req, res) => {
 
 const blogUpdate = async (req, res) => {
   try {
-    const { id } = req.params;
-
+    const { id } = req.params; // Lấy ID của blog từ URL params
     const { title, description, category } = req.body;
+    const userId = req.user._id; // Lấy ID của người dùng từ middleware xác thực
 
+    // Kiểm tra xem ID blog có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID blog không hợp lệ!" });
+    }
+
+    // Tìm blog cần cập nhật
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      return res.status(404).json({ message: "Không tìm thấy blog!" });
+    }
+
+    // Kiểm tra quyền chỉnh sửa (chỉ admin hoặc chủ bài viết mới được sửa)
+    if (blog.userId.toString() !== userId.toString() && !req.user.isAdmin) {
+      return res.status(403).json({ message: "Bạn không có quyền chỉnh sửa blog này!" });
+    }
+
+    // Tạo một đối tượng chứa các trường cần cập nhật
+    const updateData = {};
+    if (title) updateData.title = title;
+    if (description) updateData.description = description;
+    if (category) {
+      if (!mongoose.Types.ObjectId.isValid(category)) {
+        return res.status(400).json({ message: "ID danh mục không hợp lệ!" });
+      }
+      updateData.category = category;
+    }
+
+    // Cập nhật blog
     const updatedBlog = await Blog.findByIdAndUpdate(
       id,
-      { title, description, category },
-      { new: true }
-    );
+      updateData, // Chỉ cập nhật các trường được cung cấp
+      { new: true, runValidators: true } // Trả về blog đã cập nhật và chạy validation của model
+    ).populate("category", "name").populate("userId", "userName"); // Lấy thông tin liên quan
 
-    return res
-      .status(200)
-      .send({ message: "Blog update successfully", updatedBlog });
+    return res.status(200).json({ message: "Cập nhật blog thành công!", blog: updatedBlog });
+
   } catch (error) {
-    console.log(error);
-    return res.status(500).send({ message: "Internal server error" });
+    console.error("Lỗi khi cập nhật blog:", error);
+    return res.status(500).json({ message: "Lỗi server khi cập nhật blog!" });
   }
 };
 const getBlogsByCategory = async (req, res) => {

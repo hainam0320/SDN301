@@ -73,12 +73,16 @@ const HomePage = () => {
         {blogs.length > 0 ? (
           blogs.map(blog => (
             <Col key={blog._id} md={4} className="mb-3">
-              <Card>
-              <Card.Img 
-                variant="top" 
-                src={blog.image || "/default-image.jpg"} 
-                alt={blog.title} 
-              />
+              <Card className="shadow">
+                <Card.Img 
+                  variant="top" 
+                  src={blog.image || "/default-image.jpg"} 
+                  alt={blog.title} 
+                  style={{
+                    height: "200px",   // Đặt chiều cao cố định
+                    objectFit: "cover" // Cắt ảnh cho đẹp, không bị méo
+                  }} 
+                />
                 <Card.Body>
                   <Card.Title>{blog.title}</Card.Title>
                   <Card.Text>{blog.description?.substring(0, 100)}...</Card.Text>
