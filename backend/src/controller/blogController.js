@@ -78,16 +78,19 @@ const getAllBlogs = async (req, res) => {
 const getUserBlogs = async (req, res) => {
   try {
     const { userId } = req.params;
-    const userBlogs = await Blog.find({ userId });
 
-    if (!userBlogs) {
-      return res.status(400).send({ message: "Blogs not found" });
+    // Tìm tất cả blog của user dựa trên userId
+    const blogs = await Blog.find({ userId: userId })
+      .populate("category", "name") // Lấy thông tin tên danh mục
+      .populate("userId", "userName"); // Lấy thông tin userName của tác giả
+
+    if (!blogs || blogs.length === 0) {
+      return res.status(404).json({ message: "Người dùng chưa có bài viết nào.", data: blogs });
     }
 
-    return res.status(200).send({ message: "Blogs found", userBlogs });
+    res.status(200).json(blogs);
   } catch (error) {
-    console.log(error);
-    return res.status(500).send({ message: "Internal server error" });
+    res.status(500).json({ message: "Lỗi server khi lấy blog của user!", error: error.message });
   }
 };
 

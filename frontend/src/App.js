@@ -10,6 +10,7 @@ import BlogDetail from "./pages/BlogDetail";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CreateBlog from "./pages/createBlog";
+import UserBlogs from "./pages/UserBlogs";
 import { Container } from "react-bootstrap";
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
                     <Route path="/blog/:id" element={<BlogDetail />} />
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/createblog" element={<CreateBlog />} />
+                    <Route path="/myblogs" element={<UserBlogs />} />
                 </Routes>
             </div>
             <Footer />

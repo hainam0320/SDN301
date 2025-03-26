@@ -2,41 +2,52 @@ const jwt = require("jsonwebtoken");
 const User = require("../model/userModel");
 
 const generateToken = async (userId) => {
-  return await jwt.sign({ userId }, process.env.JWT_SECRET_KEY, {
-    expiresIn: "7d",
-  });
+  return jwt.sign({ userId }, process.env.JWT_SECRET_KEY, { expiresIn: "7d" });
 };
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.headers.authorization;
-    if (!token) {
-      return res.status(401).send({ message: "UnAuthrization acess" });
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).send({ message: "Unauthorized access" });
     }
 
-    const decode = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    // Lấy token sau "Bearer "
+    const token = authHeader.split(" ")[1];
 
-    req.user = decode;
-    next();
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+      const user = await User.findById(decoded.userId).select("-password");
+
+      if (!user) {
+        return res.status(401).send({ message: "User not found" });
+      }
+
+      req.user = user; // Lưu thông tin user vào request
+      next();
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).send({ message: "Token expired" });
+      } else if (err.name === "JsonWebTokenError") {
+        return res.status(401).send({ message: "Invalid token" });
+      }
+      throw err;
+    }
   } catch (error) {
-    return res.status(500).send({ message: "Something went wrongF" });
+    console.error("Auth Middleware Error:", error);
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 };
 
 const adminMiddleware = async (req, res, next) => {
   try {
-    const { userId } = req.user;
-
-    const user = await User.findById(userId);
-
-    if (!user.isAdmin) {
-      return res.status(404).send({ message: "Page not found" });
-    } else {
-      next();
+    if (!req.user || !req.user.isAdmin) {
+      return res.status(403).send({ message: "Access denied. Admins only." });
     }
-    console.log(user);
+    next();
   } catch (error) {
-    return res.status(500).send({ message: "Something went wrongF" });
+    console.error("Admin Middleware Error:", error);
+    return res.status(500).send({ message: "Internal Server Error" });
   }
 };
 

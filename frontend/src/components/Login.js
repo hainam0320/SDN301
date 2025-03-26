@@ -16,7 +16,7 @@ const Login = () => {
 
             // Lưu token vào localStorage
             localStorage.setItem('token', response.data.token);
-
+            localStorage.setItem('userId', response.data.userId);
             // Hiển thị thông báo
             setMessage(response.data.message);
 

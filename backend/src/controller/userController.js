@@ -64,15 +64,23 @@ const userLogin = async (req, res) => {
       return res.status(400).send({ message: "Invalid password" });
     }
 
-    // ✅ Tạo token sau khi kiểm tra user tồn tại và password đúng
+    // ✅ Tạo token
     const token = await generateToken(isUser._id);
 
-    return res.status(200).send({ message: "User login successfully", token });
+    // ✅ Trả về thêm userId và userName để frontend có thể lưu
+    return res.status(200).send({ 
+      message: "User login successfully", 
+      token, 
+      userId: isUser._id, // 📌 Thêm userId
+      userName: isUser.userName // 📌 Thêm userName (nếu cần)
+    });
+
   } catch (error) {
-    console.error("Login error:", error); // Log lỗi để debug
+    console.error("Login error:", error);
     return res.status(500).send({ message: "Something went wrong" });
   }
 };
+
 
 
 const forgetPassword = async (req, res) => {

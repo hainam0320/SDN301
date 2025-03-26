@@ -74,7 +74,11 @@ const HomePage = () => {
           blogs.map(blog => (
             <Col key={blog._id} md={4} className="mb-3">
               <Card>
-                <Card.Img variant="top" src={blog.image?.path || "/default-image.jpg"} alt={blog.title} />
+              <Card.Img 
+                variant="top" 
+                src={blog.image || "/default-image.jpg"} 
+                alt={blog.title} 
+              />
                 <Card.Body>
                   <Card.Title>{blog.title}</Card.Title>
                   <Card.Text>{blog.description?.substring(0, 100)}...</Card.Text>

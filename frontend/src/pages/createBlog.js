@@ -42,12 +42,12 @@ const CreateBlog = () => {
     const blogData = { title, description, category, image: imageUrl };
 
     try {
-      const res = await axios.post("http://localhost:9999/api/v1/user/create/blog", blogData, {
+      const res = await axios.post("http://localhost:9999/create/blog", blogData, {
         headers: { Authorization: token },
       });
 
       setMessage("Tạo blog thành công!");
-      setTimeout(() => navigate("/"), 2000);
+      setTimeout(() => navigate("/home"), 2000);
     } catch (error) {
       setMessage(error.response?.data?.message || "Lỗi khi tạo blog!");
     }
